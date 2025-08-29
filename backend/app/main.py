@@ -5,13 +5,12 @@ This module initializes the FastAPI application
 and includes all API routes.
 """
 
+from app.core.config import settings
+from app.core.logging_config import setup_logging
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
-from app.core.config import settings
-from app.core.logging_config import setup_logging
 
 # Configure logging
 logger = setup_logging()
