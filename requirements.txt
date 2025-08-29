@@ -1,0 +1,26 @@
+alembic==1.13.1
+black==24.2.0
+# Core
+fastapi==0.109.2
+flake8==7.0.0
+isort==5.13.2
+mypy==1.8.0
+passlib[bcrypt]==1.7.4
+psycopg2-binary==2.9.9
+
+# Documentation
+pydantic-settings==2.2.1
+
+# Development
+pytest==8.0.2
+pytest-cov==4.1.0
+python-dotenv==1.0.1
+python-dotenv==1.0.1
+
+# Authentication
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.9
+
+# Database
+sqlalchemy==2.0.28
+uvicorn[standard]==0.27.1
