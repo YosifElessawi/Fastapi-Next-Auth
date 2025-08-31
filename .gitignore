@@ -1,0 +1,12 @@
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local development
+*.env
+!.env.example
+.windsurfrules
+PLANNING.md
+TASK.md
