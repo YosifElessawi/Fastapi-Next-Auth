@@ -80,3 +80,7 @@ def setup_logging() -> logging.Logger:
 
     logger.info("Logging configured successfully")
     return logger
+
+
+# Create a module-level logger that can be imported by other modules
+logger = setup_logging()
