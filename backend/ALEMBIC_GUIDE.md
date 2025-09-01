@@ -34,3 +34,9 @@ alembic history
 ```bash
 alembic downgrade -1
 ```
+
+### Downgrade to Base
+
+```bash
+alembic downgrade base
+```

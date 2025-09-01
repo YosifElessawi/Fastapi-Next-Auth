@@ -5,6 +5,7 @@ This module initializes the FastAPI application
 and includes all API routes.
 """
 
+from app.auth.routes.auth_router import router as auth_router
 from app.core.config import settings
 from app.core.logging_config import setup_logging
 from fastapi import FastAPI, Request, status
@@ -23,9 +24,21 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     debug=settings.DEBUG,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
 )
 
+# Include API routers
+app.include_router(auth_router, prefix=settings.API_V1_STR, tags=["auth"])
+
 # Set up CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 if settings.BACKEND_CORS_ORIGINS:
     app.add_middleware(
         CORSMiddleware,

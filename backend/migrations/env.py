@@ -1,57 +1,58 @@
 import os
 import sys
 from logging.config import fileConfig
-from typing import Any
 
 from alembic import context
+
+# Import your models and settings
+from app.core.config import settings
+from app.core.database import Base
 from sqlalchemy import engine_from_config, pool
-from sqlalchemy.engine import Connection
 
-# Add the app directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+# Add the backend directory to Python path
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from app.core.config import settings  # noqa: E402
-from app.core.database import Base  # noqa: E402
-from app.models.todo import Todo  # noqa: E402, F401
-from app.models.user import User  # noqa: E402, F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Interpret the config file for Python logging.
+# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Set the SQLAlchemy URL from your settings
-config.set_main_option("sqlalchemy.url", settings.ASYNC_DATABASE_URL)
+# Import all models to ensure they are loaded
+from app.todo.models.todo import Todo  # noqa
+from app.user.models.user import User  # noqa
 
+# Set the metadata for Alembic to use
 target_metadata = Base.metadata
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode."""
+    """Run migrations in 'offline' mode.
+
+    This configures the context with just a URL
+    and not an Engine, though an Engine is acceptable
+    here as well.  By skipping the Engine creation
+    we don't even need a DBAPI to be available.
+
+    Calls to context.execute() here emit the given string to the
+    script output.
+
+    """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        compare_type=True,
-        compare_server_default=True,
-    )
-
-    with context.begin_transaction():
-        context.run_migrations()
-
-
-def do_run_migrations(connection: Connection) -> None:
-    """Run migrations in 'online' mode."""
-    context.configure(
-        connection=connection,
-        target_metadata=target_metadata,
-        compare_type=True,
-        compare_server_default=True,
     )
 
     with context.begin_transaction():
@@ -59,33 +60,25 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode."""
+    """Run migrations in 'online' mode.
 
-    def process_revision_directives(
-        context: Any, revision: Any, directives: list[Any]
-    ) -> None:
-        if getattr(config.cmd_opts, "autogenerate", False):
-            script = directives[0]
-            if script.upgrade_ops.is_empty():
-                directives.clear()
-                print("No changes in schema detected.")
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
 
-    # Use the async URL but replace the driver with psycopg2 for migrations
-    sync_url = config.get_main_option("sqlalchemy.url").replace("asyncpg", "psycopg2")
+    """
+    # Use the database URL from settings
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = settings.DATABASE_URL
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        url=sync_url,
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection,
-            target_metadata=target_metadata,
-            process_revision_directives=process_revision_directives,
-            **{}  # Removed unused parameters
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
+
         with context.begin_transaction():
             context.run_migrations()
 
