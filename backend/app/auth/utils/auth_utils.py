@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import jwt
-from app.auth.schemas.auth import Token, TokenData
+from app.auth.schemas.auth import Token
 from app.core.config import settings
 from fastapi import HTTPException, status
 from passlib.context import CryptContext
@@ -62,36 +62,4 @@ def generate_access_token(data: dict, expires_delta: Optional[timedelta] = None)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error creating access token",
-        )
-
-
-def verify_token(token: str) -> TokenData:
-    """
-    Verify a JWT token and return its payload as a TokenData object.
-    """
-    try:
-        payload = jwt.decode(
-            token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
-        # Convert the payload to TokenData
-        token_data = TokenData(username=payload.get("sub"))
-        if token_data.username is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token: missing subject",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        return token_data
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except jwt.JWTError as e:
-        logger.error(f"Token validation error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
         )

@@ -4,6 +4,7 @@ from app.core.database import get_db
 from app.user.schemas.user import UserCreate
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.orm import Session
 
 # Create router with auth prefix and consistent tags
@@ -25,7 +26,11 @@ async def register(
     return AuthService.register_user(db=db, user_data=user, request=request)
 
 
-@router.post("/login", response_model=AuthResponse)
+@router.post(
+    "/login",
+    response_model=AuthResponse,
+    dependencies=[Depends(RateLimiter(times=3, seconds=60))],
+)
 async def login_for_access_token(
     request: Request,
     form_data: OAuth2PasswordRequestForm = form_dependency,

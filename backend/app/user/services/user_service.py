@@ -155,6 +155,7 @@ class UserService:
 
             db.delete(db_user)
             db.commit()
+            logger.info(f"User {user_id} deleted successfully")
             return True
 
         except SQLAlchemyError as e:

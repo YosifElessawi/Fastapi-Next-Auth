@@ -1,22 +1,34 @@
-"""
-FastAPI Application Entry Point
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
-This module initializes the FastAPI application
-and includes all API routes.
-"""
-
+import redis.asyncio as redis  # type: ignore
 from app.auth.routes.auth_router import router as auth_router
 from app.core.config import settings
 from app.core.logging_config import setup_logging
+from app.user.routes.user_router import router as user_router
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi_limiter import FastAPILimiter
 
 # Configure logging
 logger = setup_logging()
 
-# Initialize FastAPI application
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # Startup
+    redis_connection = redis.from_url("redis://localhost:6379", encoding="utf8")
+    await FastAPILimiter.init(redis_connection)
+
+    yield
+
+    # Shutdown
+    await FastAPILimiter.close()
+
+
+# Initialize FastAPI application with lifespan
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="A FastAPI project with SQLAlchemy and PostgreSQL",
@@ -25,10 +37,12 @@ app = FastAPI(
     redoc_url="/redoc",
     debug=settings.DEBUG,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan,
 )
 
 # Include API routers
 app.include_router(auth_router, prefix=settings.API_V1_STR, tags=["auth"])
+app.include_router(user_router, prefix=settings.API_V1_STR, tags=["users"])
 
 # Set up CORS middleware
 app.add_middleware(
