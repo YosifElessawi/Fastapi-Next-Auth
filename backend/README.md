@@ -1,13 +1,13 @@
-# FastAPI Todo Application
+# FastAPI-Next-Auth Backend
 
-A comprehensive guide to building a FastAPI-based Todo application with PostgreSQL, SQLAlchemy, and Docker.
+A comprehensive authentication system built with FastAPI, PostgreSQL, SQLAlchemy, and Docker.
 
 ## Part 1: Setting up the Project 🛠️
 
 The first step is to establish a solid foundation. This includes setting up your development environment and a clear, modular project structure.
 
 ### Create a Project Directory
-Create a main folder for your project, for example, `fastapi-todo`.
+Create a main folder for your project, for example, `fastapi-next-auth`.
 
 ### Create a Virtual Environment
 

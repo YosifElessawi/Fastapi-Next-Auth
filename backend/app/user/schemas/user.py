@@ -9,7 +9,7 @@ class UserBase(BaseModel):
 
     email: EmailStr
     username: str = Field(..., min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_-]+$")
-    full_name: Optional[str] = Field(None, max_length=100)
+    fullname: str = Field(..., max_length=100)
 
 
 class UserCreate(UserBase):
@@ -60,8 +60,11 @@ class UserInDB(UserBase):
 class UserUpdate(BaseModel):
     """Schema for updating user information."""
 
-    email: Optional[str] = None
-    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    fullname: Optional[str] = None
     password: Optional[str] = None
     is_active: Optional[bool] = None
     is_superuser: Optional[bool] = None
+
+    class Config:
+        from_attributes = True

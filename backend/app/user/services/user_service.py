@@ -92,7 +92,7 @@ class UserService:
                 email=user.email,
                 username=user.username,
                 hashed_password=hashed_password,
-                full_name=user.full_name,
+                fullname=user.fullname,
                 is_active=True,
                 is_superuser=False,
             )
